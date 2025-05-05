@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>美味食谱</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f0f2f5;
+        color: #333;
+      }
+
+      .path {
+        margin-bottom: 20px;
+        padding: 10px;
+        background-color: #e9ecef;
+        border-radius: 5px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+      }
+
+      .home {
+        margin-right: 10px;
+        cursor: pointer;
+        color: #1a73e8;
+        text-decoration: none;
+      }
+
+      .home:hover {
+        text-decoration: underline;
+      }
+
+      .path-segment {
+        margin-right: 10px;
+        cursor: pointer;
+        color: #1a73e8;
+        text-decoration: none;
+      }
+
+      .path-separator {
+        margin: 0 5px;
+        color: #616161;
+      }
+
+      .path-segment:hover {
+        text-decoration: underline;
+      }
+
+      ul {
+        list-style-type: none;
+        padding-left: 15px;
+        margin: 0;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      }
+
+      li {
+        padding: 12px 15px;
+        border-bottom: 1px solid #e9ecef;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+      }
+
+      li:hover {
+        background-color: #f8f9fa;
+      }
+
+      li.file {
+        color: #1a73e8;
+        text-decoration: none;
+      }
+
+      li.file:hover {
+        text-decoration: underline;
+      }
+
+      .folder-icon {
+        margin-right: 10px;
+        color: #616161;
+      }
+
+      .file-icon {
+        margin-right: 10px;
+        color: #1a73e8;
+      }
+
+      .empty-message {
+        color: #95a5a6;
+        text-align: center;
+        padding: 20px;
+        font-style: italic;
+        font-weight: 300;
+      }
+
+      .qq-group-link {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .qq-group-link a {
+        color: #1a73e8;
+        text-decoration: none;
+      }
+
+      .qq-group-link a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="qq-group-link">
+      <a href="qrcode.webp" target="_blank">q 群：972091034</a>
+    </div>
+    <div id="path" class="path"></div>
+    <ul id="catalog"></ul>
+
+    <script>
+      let currentPath = [];
+
+      async function loadJson() {
+        try {
+          const response = await fetch("content.json");
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          console.error("加载 JSON 文件时出错:", error);
+          return {};
+        }
+      }
+
+      function updatePath() {
+        const pathElement = document.getElementById("path");
+        pathElement.innerHTML = "";
+
+        const home = document.createElement("span");
+        home.className = "home";
+        home.textContent = "根目录";
+        home.addEventListener("click", () => {
+          currentPath = [];
+          updatePath();
+          navigateToPath();
+        });
+        pathElement.appendChild(home);
+
+        if (currentPath.length === 0) {
+          return;
+        }
+
+        pathElement.appendChild(document.createTextNode(" > "));
+
+        let path = [];
+        let tempPath = [];
+        for (const segment of currentPath) {
+          tempPath.push(segment);
+          path.push({
+            name: segment,
+            path: tempPath.join("/"),
+          });
+        }
+
+        for (let i = 0; i < path.length; i++) {
+          const segment = path[i];
+          const span = document.createElement("span");
+          span.className = "path-segment";
+          span.textContent = segment.name;
+
+          if (i < path.length - 1) {
+            span.addEventListener("click", () => {
+              currentPath = currentPath.slice(0, i + 1);
+              updatePath();
+              navigateToPath();
+            });
+          } else {
+            span.style.fontWeight = "bold";
+            span.style.color = "#333";
+          }
+
+          pathElement.appendChild(span);
+
+          if (i < path.length - 1) {
+            const separator = document.createElement("span");
+            separator.className = "path-separator";
+            separator.textContent = ">";
+            pathElement.appendChild(separator);
+          }
+        }
+      }
+
+      function navigateToPath() {
+        loadJson().then((data) => {
+          let currentData = data;
+          try {
+            for (const segment of currentPath) {
+              currentData = currentData[segment];
+            }
+            displayCatalog(currentData, document.getElementById("catalog"));
+          } catch (error) {
+            console.error("路径导航错误:", error);
+            displayCatalog({}, document.getElementById("catalog"));
+          }
+        });
+      }
+
+      function displayCatalog(data, parentElement) {
+        parentElement.innerHTML = "";
+
+        if (Object.keys(data).length === 0) {
+          parentElement.innerHTML = '<li class="empty-message">暂无内容</li>';
+          return;
+        }
+
+        for (const key in data) {
+          const li = document.createElement("li");
+
+          if (typeof data[key] === "object") {
+            // 文件夹
+            li.innerHTML = `<span class="folder-icon">📁</span>${key}`;
+            li.addEventListener("click", () => {
+              currentPath.push(key);
+              updatePath();
+              navigateToPath();
+            });
+          } else {
+            // 文件
+            li.className = "file";
+            li.innerHTML = `<span class="file-icon">📄</span>${key}`;
+            li.addEventListener("click", () => {
+              window.open(data[key], "_blank");
+            });
+          }
+
+          parentElement.appendChild(li);
+        }
+      }
+
+      // 初始化
+      async function initialize() {
+        const data = await loadJson();
+        displayCatalog(data, document.getElementById("catalog"));
+        updatePath();
+      }
+
+      initialize();
+    </script>
+  </body>
+</html>
