@@ -306,15 +306,8 @@
       // 修改：Markdown文件点击事件添加加载动画
       function displayCatalog(data, parentElement) {
         parentElement.innerHTML = ""; // 清空旧内容
-
-        // 关键修复：获取元素时添加存在性检查
         const markdownContent = document.getElementById("markdown-content");
-
-        if (!markdownContent) {
-          console.error("未找到 ID 为 'markdown-content' 的 DOM 元素");
-          return; // 元素不存在时提前终止逻辑
-        }
-        markdownContent.innerHTML = ""; // 安全操作
+        markdownContent.innerHTML = "";
 
         // 新增：数据为空时显示提示（避免目录消失）
         if (Object.keys(data).length === 0) {
@@ -327,70 +320,31 @@
         if (data.index) {
           const indexPath = `doc/${data.index.replace(/^\.\//, "")}`;
           fetch(indexPath)
-            .then((res) => {
-              // 新增：检查响应状态（避免 404 等错误）
-              if (!res.ok) throw new Error(`HTTP 状态码：${res.status}`);
-              return res.text();
-            })
+            .then((res) => res.text())
             .then((text) => {
-              if (markdownContent) {
-                // 关键修复：保留 giscus 容器，仅替换 Markdown 内容
-                const giscusContainer =
-                  markdownContent.querySelector(".giscus");
-                const markdownHtml = marked.parse(text);
-                // 将 Markdown 内容插入到 giscus 容器之前（若存在）
-                if (giscusContainer) {
-                  markdownContent.insertBefore(
-                    document
-                      .createRange()
-                      .createContextualFragment(markdownHtml),
-                    giscusContainer
-                  );
-                } else {
-                  // 若容器不存在（首次加载），直接设置内容并追加容器
-                  markdownContent.innerHTML = markdownHtml;
-                  const newGiscus = document.createElement("div");
-                  newGiscus.className = "giscus";
-                  markdownContent.appendChild(newGiscus);
-                }
+              markdownContent.innerHTML = marked.parse(text);
 
-                // 提取 data-term 并更新 Giscus（原有逻辑）
-                const dataTermMatch = text.match(
-                  /<!--\s*data-term="(\d+)"\s*-->/
-                );
-                const discussionNumber = dataTermMatch ? dataTermMatch[1] : "";
-                const giscusScript = document.getElementById("giscus-script");
-                if (giscusScript && discussionNumber) {
-                  giscusScript.dataset.term = discussionNumber;
-                  // 触发重新加载（容器已存在）
-                  setTimeout(() => {
-                    document.dispatchEvent(new Event("giscus:load"));
-                  }, 200);
-                }
-              }
+              // 新增：提取 Markdown 中的第一个 h1 作为页面标题
+              const parser = new DOMParser();
+
+              const htmlDoc = parser.parseFromString(
+                marked.parse(text),
+                "text/html"
+              );
+              const firstH1 = htmlDoc.querySelector("h1");
+              const pageTitle = firstH1 ? firstH1.textContent : "美味食谱"; // 默认标题
+              document.title = pageTitle; // 设置页面标题
+
+              // 延迟 200ms 确保内容渲染完成后触发 Giscus 扫描
+              setTimeout(() => {
+                document.dispatchEvent(new Event("giscus:load"));
+              }, 200);
             })
-            .catch((error) => {
-              if (markdownContent) {
-                // 显示具体错误信息（如 404）
-                markdownContent.innerHTML = `
-                  <div>加载描述失败（文件路径：${indexPath}）<br>
-                  错误信息：${error.message}</div>
-                `;
-                // 保留 giscus 容器（若存在）
-                const giscusContainer =
-                  markdownContent.querySelector(".giscus");
-                if (giscusContainer)
-                  markdownContent.appendChild(giscusContainer);
-              }
-              console.error("加载 index.md 失败:", error);
-            });
+            .catch(
+              () => (markdownContent.innerHTML = "<div>加载描述失败</div>")
+            );
         } else {
-          // 关键修复：当无 index 时显示提示并保留 giscus 容器
-          if (markdownContent) {
-            markdownContent.innerHTML = "<div>本页面暂无描述</div>";
-            const giscusContainer = markdownContent.querySelector(".giscus");
-            if (giscusContainer) markdownContent.appendChild(giscusContainer);
-          }
+          markdownContent.innerHTML = "<div>本页面暂无描述</div>";
         }
 
         // 渲染目录列表（新增：添加错误边界）
@@ -428,38 +382,17 @@
                   fetch(mdFullPath)
                     .then((res) => res.text())
                     .then((text) => {
-                      const markdownContent =
-                        document.getElementById("markdown-content");
-                      if (markdownContent) {
-                        // 关键修复：保留 giscus 容器
-                        const giscusContainer =
-                          markdownContent.querySelector(".giscus");
-                        const markdownHtml = marked.parse(text);
-                        // 将 Markdown 内容插入到 giscus 容器之前（若容器存在）
-                        if (giscusContainer) {
-                          markdownContent.innerHTML = markdownHtml; // 先清空旧内容（不包含容器）
-                          markdownContent.appendChild(giscusContainer); // 重新追加容器
-                        } else {
-                          // 首次加载时创建容器
-                          markdownContent.innerHTML = markdownHtml;
-                          const newGiscus = document.createElement("div");
-                          newGiscus.className = "giscus";
-                          markdownContent.appendChild(newGiscus);
-                        }
-                        document.dispatchEvent(new Event("giscus:load")); // 触发重新加载
-                      }
+                      document.getElementById("markdown-content").innerHTML =
+                        marked.parse(text);
+                      document.dispatchEvent(new Event("giscus:load")); // 触发 Giscus 初始化
                     })
-                    .catch((err) => {
-                      if (markdownContent) {
-                        markdownContent.innerHTML = `<div>文件加载失败：${mdFullPath}</div>`;
-                        // 保留 giscus 容器（若存在）
-                        const giscusContainer =
-                          markdownContent.querySelector(".giscus");
 
-                        if (giscusContainer)
-                          markdownContent.appendChild(giscusContainer);
-                      }
-                    });
+                    .catch(
+                      (err) =>
+                        (document.getElementById(
+                          "markdown-content"
+                        ).innerHTML = `<div>文件加载失败：${mdFullPath}</div>`)
+                    );
                 });
               } else {
                 li.addEventListener("click", () =>
