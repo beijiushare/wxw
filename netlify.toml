@@ -1,0 +1,4 @@
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "frame-ancestors 'self' http://127.0.0.1:5500 https://*.netlify.app https://giscus.app;"
