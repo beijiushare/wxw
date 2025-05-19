@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- 添加 CSP 元标签 -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="frame-ancestors 'self' http://127.0.0.1:5500 https://*.netlify.app https://giscus.app;"
+    />
     <title>美味食谱</title>
 
     <link rel="stylesheet" href="styles.css" />
