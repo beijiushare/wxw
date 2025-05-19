@@ -4,6 +4,9 @@ let currentPath = [];
 const baseGiscusUrl =
   "https://giscus.app/zh-CN/widget?origin=http%3A%2F%2F127.0.0.1%3A5500%2F&session=149fe82e2daee83dcc51ad25y5OeLQ%2Bz%2FL5yVVME5wK2IqQB3Q2d5qFVGddUtS%2FyouBsyyuroZeW7dZZWCOglt9R8uPc7k%2FBdIVAx22xwMlsQT0%2B3uTPNzZfWCEitbs2tWpy5Xj3kC66G8PiNH0%3D&theme=preferred_color_scheme&reactionsEnabled=1&emitMetadata=0&inputPosition=top&repo=beijiushare%2Fwxw&repoId=R_kgDOOkuBRg&category=&categoryId=undefined&strict=0&description=&backLink=http%3A%2F%2F127.0.0.1%3A5500%2F&number=";
 
+// 存储当前的 term
+let currentGiscusTerm = "5";
+
 // 工具函数：加载JSON数据
 async function loadJson() {
   try {
@@ -98,8 +101,7 @@ function navigateToPath() {
 
 // 动态更新 Giscus iframe 的 src
 function updateGiscusIframe(term) {
-  const giscusUrl = baseGiscusUrl + term;
-  document.getElementById("giscus-iframe").src = giscusUrl;
+  currentGiscusTerm = term;
 }
 
 function displayCatalog(data, parentElement) {
@@ -200,3 +202,13 @@ async function initialize() {
   }
 }
 initialize();
+
+// 获取按钮元素
+const giscusButton = document.getElementById("giscus-button");
+
+// 为按钮添加点击事件监听器
+giscusButton.addEventListener("click", () => {
+  const giscusUrl = baseGiscusUrl + currentGiscusTerm;
+  // 跳转到新页面
+  window.open(giscusUrl, "_blank");
+});

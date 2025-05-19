@@ -144,7 +144,43 @@ li.file:hover {
   border-radius: 4px;
   margin: 20px 0;
 }
-.giscus {
-  margin-top: 30px;
-  margin-bottom: 30px;
+
+#giscus-button {
+  /* 基础样式 */
+  display: block; /* 将按钮设置为块级元素 */
+  margin: 30px auto; /* 上下外边距 30px，左右外边距自动，实现水平居中 */
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+
+  /* 边框和圆角 */
+  border: none;
+  border-radius: 5px;
+
+  /* 背景和文字颜色 */
+  background-color: #007bff;
+  color: white;
+
+  /* 过渡效果 */
+  transition: background-color 0.3s ease;
+}
+
+#giscus-button:hover {
+  /* 鼠标悬停时的背景颜色 */
+  background-color: #0056b3;
+}
+
+#giscus-button:active {
+  /* 鼠标点击时的背景颜色 */
+  background-color: #004085;
+  transform: translateY(1px);
+}
+
+#giscus-button:focus {
+  /* 聚焦时的外边框 */
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);
 }
