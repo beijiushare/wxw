@@ -1,14 +1,18 @@
-/* 基础样式 */
-body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  margin: 0;
-  padding: 20px;
-  background-color: #f0f2f5;
-  color: #333;
+.qq-group-link {
+  text-align: center;
+  margin-bottom: 20px;
 }
 
-/* 路径导航样式 */
-.path {
+.qq-group-link a {
+  color: #1a73e8;
+  text-decoration: none;
+}
+
+.qq-group-link a:hover {
+  text-decoration: underline;
+}
+
+#path {
   margin-bottom: 20px;
   padding: 10px;
   background-color: #e9ecef;
@@ -17,6 +21,7 @@ body {
   display: flex;
   align-items: center;
 }
+
 .home,
 .path-segment {
   margin-right: 10px;
@@ -24,17 +29,18 @@ body {
   color: #1a73e8;
   text-decoration: none;
 }
+
 .home:hover,
 .path-segment:hover {
   text-decoration: underline;
 }
+
 .path-separator {
   margin: 0 5px;
   color: #616161;
 }
 
-/* 目录列表样式 */
-ul {
+#catalog {
   list-style-type: none;
   padding-left: 15px;
   margin: 0;
@@ -42,6 +48,7 @@ ul {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
+
 li {
   padding: 12px 15px;
   border-bottom: 1px solid #e9ecef;
@@ -50,28 +57,30 @@ li {
   display: flex;
   align-items: center;
 }
+
 li:hover {
   background-color: #f8f9fa;
 }
+
 li.file {
   color: #1a73e8;
   text-decoration: none;
 }
+
 li.file:hover {
   text-decoration: underline;
 }
 
-/* 图标样式 */
 .folder-icon {
   margin-right: 10px;
   color: #616161;
 }
+
 .file-icon {
   margin-right: 10px;
   color: #1a73e8;
 }
 
-/* 辅助样式 */
 .empty-message {
   color: #95a5a6;
   text-align: center;
@@ -79,26 +88,74 @@ li.file:hover {
   font-style: italic;
   font-weight: 300;
 }
-.qq-group-link {
-  text-align: center;
-  margin-bottom: 20px;
-}
-.qq-group-link a {
-  color: #1a73e8;
-  text-decoration: none;
-}
-.qq-group-link a:hover {
-  text-decoration: underline;
+
+#markdown-content {
+  margin-top: 20px;
+  padding: 24px 32px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  line-height: 1.7;
 }
 
-/* 加载动画样式 */
+#markdown-content h1,
+#markdown-content h2,
+#markdown-content h3 {
+  color: #1a73e8;
+  margin: 0 0 20px 0;
+}
+
+#markdown-content p {
+  color: #333;
+  margin: 16px 0;
+  font-size: 16px;
+}
+
+#markdown-content img {
+  max-width: 100%;
+  border-radius: 4px;
+  margin: 20px 0;
+}
+
+#giscus-button {
+  display: block;
+  margin: 30px auto;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+#giscus-button:hover {
+  background-color: #0056b3;
+}
+
+#giscus-button:active {
+  background-color: #004085;
+  transform: translateY(1px);
+}
+
+#giscus-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);
+}
+
 .loading {
   position: fixed;
+
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1000;
 }
+
 .loading-spinner {
   width: 64px;
   height: 64px;
@@ -107,6 +164,7 @@ li.file:hover {
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -115,72 +173,7 @@ li.file:hover {
     transform: rotate(360deg);
   }
 }
+
 .loading.hide {
   display: none;
-}
-
-/* Markdown内容样式 */
-.markdown-content {
-  margin-top: 20px;
-  padding: 24px 32px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-  line-height: 1.7;
-}
-.markdown-content h1,
-.markdown-content h2,
-.markdown-content h3 {
-  color: #1a73e8;
-  margin: 0 0 20px 0;
-}
-.markdown-content p {
-  color: #333;
-  margin: 16px 0;
-  font-size: 16px;
-}
-.markdown-content img {
-  max-width: 100%;
-  border-radius: 4px;
-  margin: 20px 0;
-}
-
-#giscus-button {
-  /* 基础样式 */
-  display: block; /* 将按钮设置为块级元素 */
-  margin: 30px auto; /* 上下外边距 30px，左右外边距自动，实现水平居中 */
-  padding: 10px 20px;
-  font-size: 16px;
-  font-weight: bold;
-  text-align: center;
-  text-decoration: none;
-  cursor: pointer;
-
-  /* 边框和圆角 */
-  border: none;
-  border-radius: 5px;
-
-  /* 背景和文字颜色 */
-  background-color: #007bff;
-  color: white;
-
-  /* 过渡效果 */
-  transition: background-color 0.3s ease;
-}
-
-#giscus-button:hover {
-  /* 鼠标悬停时的背景颜色 */
-  background-color: #0056b3;
-}
-
-#giscus-button:active {
-  /* 鼠标点击时的背景颜色 */
-  background-color: #004085;
-  transform: translateY(1px);
-}
-
-#giscus-button:focus {
-  /* 聚焦时的外边框 */
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);
 }

@@ -7,14 +7,28 @@ const baseGiscusUrl =
 // 存储当前的 term
 let currentGiscusTerm = "5";
 
-// 工具函数：加载JSON数据
-async function loadJson() {
+// 工具函数：递归加载 JSON 数据
+async function loadData(filePath) {
   try {
-    const response = await fetch("content.json");
-    if (!response.ok) throw new Error("content.json 加载失败");
+    const response = await fetch(filePath);
+    if (!response.ok) throw new Error(`${filePath} 加载失败`);
     const data = await response.json();
-    console.log("成功加载 content.json 数据:", data);
-    return data;
+
+    // 递归处理对象，加载子 JSON 文件
+    async function processObject(obj) {
+      for (const key in obj) {
+        if (obj.hasOwnProperty(key) && obj[key].dataFile) {
+          const subData = await loadData(`data/${obj[key].dataFile}`);
+          obj[key] = { ...obj[key], ...subData };
+          delete obj[key].dataFile;
+        } else if (typeof obj[key] === "object" && obj[key] !== null) {
+          await processObject(obj[key]);
+        }
+      }
+      return obj;
+    }
+
+    return processObject(data);
   } catch (error) {
     console.error("加载 JSON 文件时出错:", error);
     return {};
@@ -83,7 +97,7 @@ function hideLoading() {
 
 function navigateToPath() {
   showLoading();
-  loadJson().then((data) => {
+  loadData("data/content.json").then((data) => {
     let currentData = data;
     try {
       for (const segment of currentPath) {
@@ -145,42 +159,82 @@ function displayCatalog(data, parentElement) {
       const li = document.createElement("li");
       const value = data[key];
 
-      if (typeof value === "object" && value !== null) {
+      const isMdFile =
+        typeof value === "string" && value.toLowerCase().endsWith(".md");
+      const isFinalLevel = value && value.flag === "1";
+      const fileIcon =
+        isFinalLevel || isMdFile
+          ? "📄"
+          : typeof value === "object" && value !== null
+          ? "📁"
+          : "📄";
+      li.innerHTML = `<span class="file-icon">${fileIcon}</span>${key}`;
+
+      if (isFinalLevel) {
+        // 最后一个层级，弹出包含链接按钮的弹窗
+        li.className = "file";
+        li.addEventListener("click", () => {
+          const modal = document.createElement("div");
+          modal.className = "custom-modal";
+
+          const modalContent = document.createElement("div");
+          modalContent.className = "modal-content";
+
+          // 遍历除 flag 外的其他属性作为链接
+          for (const linkKey in value) {
+            if (linkKey === "flag") continue;
+            const linkBtn = document.createElement("button");
+            linkBtn.className = "modal-link-btn";
+            linkBtn.textContent = linkKey;
+            linkBtn.addEventListener("click", () => {
+              window.open(value[linkKey], "_blank");
+              modal.remove(); // 点击后关闭弹窗
+            });
+            modalContent.appendChild(linkBtn);
+          }
+
+          // 创建关闭按钮
+          const closeBtn = document.createElement("button");
+          closeBtn.className = "modal-close-btn";
+          closeBtn.textContent = "×";
+          closeBtn.addEventListener("click", () => {
+            modal.remove();
+          });
+          modalContent.appendChild(closeBtn);
+
+          modal.appendChild(modalContent);
+          document.body.appendChild(modal);
+        });
+      } else if (isMdFile) {
+        // Markdown 文件处理
+        li.className = "file";
+        li.addEventListener("click", () => {
+          currentPath = [key];
+          updatePath();
+          const mdFullPath = `doc/${value}`;
+          fetch(mdFullPath)
+            .then((res) => res.text())
+            .then((text) => {
+              markdownContent.innerHTML = marked.parse(text);
+              const termMatch = text.match(/<!--\s*data-term="(\d+)"\s*-->/);
+              const term = termMatch ? termMatch[1] : "5";
+              updateGiscusIframe(term);
+            })
+            .catch((err) => {
+              markdownContent.innerHTML = `<div>文件加载失败：${mdFullPath}</div>`;
+            });
+        });
+      } else if (typeof value === "object" && value !== null) {
         // 文件夹处理
-        li.innerHTML = `<span class="folder-icon">📁</span>${key}`;
         li.addEventListener("click", () => {
           currentPath.push(key);
           updatePath();
           navigateToPath();
         });
       } else {
-        // 文件处理
-        const isMdFile = value.toLowerCase().endsWith(".md");
-        const displayName = isMdFile ? `${key}.md` : key;
-        const fileIcon = isMdFile ? "📇" : "📄";
+        // 普通文件处理
         li.className = "file";
-        li.innerHTML = `<span class="file-icon">${fileIcon}</span>${displayName}`;
-
-        if (isMdFile) {
-          const mdFullPath = `doc/${value}`;
-          li.addEventListener("click", () => {
-            currentPath = [displayName];
-            updatePath();
-            fetch(mdFullPath)
-              .then((res) => res.text())
-              .then((text) => {
-                markdownContent.innerHTML = marked.parse(text);
-                const termMatch = text.match(/<!--\s*data-term="(\d+)"\s*-->/);
-                const term = termMatch ? termMatch[1] : "5";
-                updateGiscusIframe(term);
-              })
-              .catch((err) => {
-                markdownContent.innerHTML = `<div>文件加载失败：${mdFullPath}</div>`;
-              });
-          });
-        } else {
-          li.addEventListener("click", () => window.open(value, "_blank"));
-        }
+        li.addEventListener("click", () => window.open(value, "_blank"));
       }
       parentElement.appendChild(li);
     }
@@ -194,7 +248,7 @@ function displayCatalog(data, parentElement) {
 async function initialize() {
   showLoading();
   try {
-    const data = await loadJson();
+    const data = await loadData("data/content.json");
     displayCatalog(data, document.getElementById("catalog"));
     updatePath();
   } finally {

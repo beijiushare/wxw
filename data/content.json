@@ -1,0 +1,49 @@
+{
+  "index": "001.md",
+  "结构预览": "001_1.md",
+  "1_无删减视频": {
+    "index": "002.md",
+    "1_SolyASMR": {
+      "index": "002_1.md",
+      "dataFile": "datadetail/1_1.json"
+    },
+    "2_Cherry Crush": {
+      "index": "002_2.md",
+      "dataFile": "datadetail/1_2.json"
+    },
+    "3_DizzyDora666": {
+      "index": "002_3.md",
+      "dataFile": "datadetail/1_3.json"
+    },
+    "4_thesounds_of_girls": {
+      "index": "002_4.md",
+      "dataFile": "datadetail/1_4.json"
+    }
+  },
+  "2_嵌入字幕音声": {
+    "index": "003.md",
+    "1_涼花みなせ": {
+      "index": "003_1.md",
+      "dataFile": "datadetail/2_1.json"
+    },
+    "2_みたかりん & 陽向葵ゅか": {
+      "index": "003_2.md",
+      "dataFile": "datadetail/2_2.json"
+    },
+    "3_四方山みかん": {
+      "index": "003_3.md",
+      "dataFile": "datadetail/2_3.json"
+    },
+    "4_白沢サヤカ": {
+      "index": "003_4.md",
+      "dataFile": "datadetail/2_4.json"
+    }
+  },
+  "3_其他": {
+    "index": "004.md",
+    "1_资源聚合": {
+      "index": "004_1.md"
+    },
+    "2_站友推荐": {}
+  }
+}
