@@ -118,15 +118,6 @@ function updateGiscusIframe(term) {
   currentGiscusTerm = term;
 }
 
-// 新增：显示复制提示
-function showCopyNotice() {
-  const notice = document.getElementById("copy-notice");
-  notice.classList.remove("hidden");
-  setTimeout(() => {
-    notice.classList.add("hidden");
-  }, 5000);
-}
-
 function displayCatalog(data, parentElement) {
   parentElement.innerHTML = "";
   const markdownContent = document.getElementById("markdown-content");
@@ -196,23 +187,8 @@ function displayCatalog(data, parentElement) {
             linkBtn.className = "modal-link-btn";
             linkBtn.textContent = linkKey;
             linkBtn.addEventListener("click", () => {
-              if (linkKey === "MixFile") {
-                // 复制 MixFile 链接
-                navigator.clipboard
-                  .writeText(value[linkKey])
-                  .then(() => {
-                    showCopyNotice();
-                    modal.remove(); // 点击后关闭弹窗
-                  })
-                  .catch((err) => {
-                    console.error("复制链接失败:", err);
-                    window.open(value[linkKey], "_blank");
-                    modal.remove();
-                  });
-              } else {
-                window.open(value[linkKey], "_blank");
-                modal.remove(); // 点击后关闭弹窗
-              }
+              window.open(value[linkKey], "_blank");
+              modal.remove(); // 点击后关闭弹窗
             });
             modalContent.appendChild(linkBtn);
           }
